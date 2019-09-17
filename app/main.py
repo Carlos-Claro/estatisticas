@@ -102,7 +102,7 @@ class Estatisticas(object):
             self.roda_imovel_dia(x)
         
     def empresa(self):
-        for x in range(127,1,-1):
+        for x in range(101,1,-1):
             print(x)
             self.roda_empresa_dia(x)
         self.fim = time.time()
