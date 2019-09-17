@@ -95,9 +95,6 @@ class Estatisticas(object):
                 #for k,v in i.items():
                 #    post = json.dumps(self.get_data_imovel(k,v,data))
                 #    print(post)
-        self.fim = time.time()
-        print(self.fim-self.inicio)
-        
         
     def imovel(self):
         for x in range(180,1,-1):
@@ -105,7 +102,7 @@ class Estatisticas(object):
             self.roda_imovel_dia(x)
         
     def empresa(self):
-        for x in range(145,1,-1):
+        for x in range(127,1,-1):
             print(x)
             self.roda_empresa_dia(x)
         self.fim = time.time()
