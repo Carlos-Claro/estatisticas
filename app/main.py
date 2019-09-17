@@ -70,8 +70,8 @@ class Estatisticas(object):
                 post = json.dumps(self.get_data(k,v,data))
                 print(post)
                 res = requests.post(self.URL_POST_LOG_EMPRESA,json=post)
-        self.fim = time.time()
-        print(self.fim-self.inicio)
+                del post
+                del res
         
     def roda_imovel_dia(self, dias):
         data = self.get_dia(dias)
@@ -105,9 +105,11 @@ class Estatisticas(object):
             self.roda_imovel_dia(x)
         
     def empresa(self):
-        for x in range(180,1,-1):
+        for x in range(145,1,-1):
             print(x)
             self.roda_empresa_dia(x)
+        self.fim = time.time()
+        print(self.fim-self.inicio)
     
 if __name__ == '__main__':
     Estatisticas()
