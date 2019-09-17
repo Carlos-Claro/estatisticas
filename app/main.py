@@ -19,7 +19,13 @@ class Estatisticas(object):
         self.URL_GET = self.URI + 'log_empresas/'
         self.URL_POST_LOG_EMPRESA = self.URI + 'log_empresa/'
         self.URL_GET_IMOVEIS = self.URI + 'log_imoveis/'
+        self.URL_GET_IMOVEIS_B = self.URI + 'log_imoveis_b/'
         self.URL_POST_LOG_IMOVEL = self.URI + 'log_imovel/'
+        if 'imovel' in sys.argv:
+            self.imovel()
+        else:
+            self.empresa()
+        
         
     def get_dia(self,dias):
         da = datetime.datetime.now() - datetime.timedelta(days=int(dias))
@@ -72,21 +78,36 @@ class Estatisticas(object):
         g = {'dias':dias}
         itens = requests.get(self.URL_GET_IMOVEIS,params=g)
         if itens.status_code == 200:
-            i = itens.json()
-            print(i)
-            for k,v in i.items():
-                post = json.dumps(self.get_data_imovel(k,v,data))
-                print(post)
-                #res = requests.post(self.URL_POST_LOG_EMPRESA,json=post)
+            imoveis = itens.json()
+            for chave,valor in imoveis.items():
+                print(valor)
+                ga = {'dias':dias,'id_imovel':chave}
+                i = requests.get(self.URL_GET_IMOVEIS_B,params=ga)
+                tipos = i.json()
+                imovel = tipos
+                imovel['id_imovel'] = int(chave)
+                imovel['data'] = self.get_dia(dias)
+                imovel['total_acessos'] = valor
+                print(imovel)
+                res = requests.post(self.URL_POST_LOG_IMOVEL,json=json.dumps(imovel))
+                del imovel
+                #exit()
+                #for k,v in i.items():
+                #    post = json.dumps(self.get_data_imovel(k,v,data))
+                #    print(post)
         self.fim = time.time()
         print(self.fim-self.inicio)
         
         
-    def main(self):
+    def imovel(self):
+        for x in range(180,1,-1):
+            print(x)
+            self.roda_imovel_dia(x)
         
-        self.roda_imovel_dia(90)
-        #for x in range(365,181,-1):
-        #    print(x)
+    def empresa(self):
+        for x in range(180,1,-1):
+            print(x)
+            self.roda_empresa_dia(x)
     
 if __name__ == '__main__':
-    Estatisticas().main()
+    Estatisticas()
