@@ -97,7 +97,7 @@ class Estatisticas(object):
                 #    print(post)
         
     def imovel(self):
-        for x in range(1,180,1):
+        for x in range(1,90,1):
             print(x)
             self.roda_imovel_dia(x)
         
