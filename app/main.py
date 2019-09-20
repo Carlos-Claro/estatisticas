@@ -17,8 +17,12 @@ class Estatisticas(object):
             self.URI = 'http://imoveis.powempresas.com/'
         self.inicio = time.time()
         self.URL_GET = self.URI + 'log_empresas/'
+        self.URL_GET_DATA_MIN = self.URI + 'log_empresa_min_data/'
+        self.URL_GET_DATA_MAX = self.URI + 'log_empresa_max_data/'
         self.URL_POST_LOG_EMPRESA = self.URI + 'log_empresa/'
         self.URL_GET_IMOVEIS = self.URI + 'log_imoveis/'
+        self.URL_GET_IMOVEIS_MIN = self.URI + 'log_imovel_min_data/'
+        self.URL_GET_IMOVEIS_MAX = self.URI + 'log_imovel_max_data/'
         self.URL_GET_IMOVEIS_B = self.URI + 'log_imoveis_b/'
         self.URL_POST_LOG_IMOVEL = self.URI + 'log_imovel/'
         if 'imovel' in sys.argv:
@@ -95,16 +99,37 @@ class Estatisticas(object):
                 #for k,v in i.items():
                 #    post = json.dumps(self.get_data_imovel(k,v,data))
                 #    print(post)
-        
+    
     def imovel(self):
-        for x in range(1,90,1):
-            print(x)
-            self.roda_imovel_dia(x)
+        get_data = requests.get(self.URL_GET_IMOVEIS_MIN)
+        if get_data.status_code == 200:
+            data_min = get_data.json()
+            date_time_str = data_min['itens'][0]['data']
+            date_time_obj = datetime.datetime.strptime(str(date_time_str), "%Y-%m-%dT%H:%M:%SZ")
+            data_menos = date_time_obj - datetime.timedelta(days=1)
+            date_now = datetime.datetime.now()
+            dias = data_menos.date() - date_now.date()
+            d = str(abs(dias)).split(' ')
+            di = int(d[0])
+            for x in range(di,di+1,1):
+                print(x)
+                self.roda_imovel_dia(x)
+        self.fim = time.time()
+        print(self.fim-self.inicio)
         
     def empresa(self):
-        for x in range(101,1,-1):
-            print(x)
-            self.roda_empresa_dia(x)
+        get_data = requests.get(self.URL_GET_DATA_MAX)
+        if get_data.status_code == 200:
+            data_max = get_data.json()
+            date_time_str = data_max['itens'][0]['data']
+            date_time_obj = datetime.datetime.strptime(str(date_time_str), "%Y-%m-%dT%H:%M:%SZ")
+            date_now = datetime.datetime.now()
+            data_mais = date_time_obj + datetime.timedelta(days=1)
+            dias = data_mais.date() - date_now.date()
+            d = str(abs(dias)).split(' ')
+            for x in range(int(d[0]),1,-1):
+                print(x)
+                self.roda_empresa_dia(x)
         self.fim = time.time()
         print(self.fim-self.inicio)
     
