@@ -131,7 +131,6 @@ class Estatisticas(object):
             dias = data_mais.date() - date_now.date()
             d = str(abs(dias)).split(' ')
             print(d)
-            exit()
             for x in range(int(d[0]),1,-1):
                 print(x)
                 self.roda_empresa_dia(x)
