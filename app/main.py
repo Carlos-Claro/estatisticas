@@ -122,6 +122,7 @@ class Estatisticas(object):
         if get_data.status_code == 200:
             data_max = get_data.json()
             date_time_str = data_max['itens'][0]['data']
+            print(date_time_str)
             date_time_obj = datetime.datetime.strptime(str(date_time_str), "%Y-%m-%dT%H:%M:%SZ")
             date_now = datetime.datetime.now()
             data_mais = date_time_obj - datetime.timedelta(days=1)
