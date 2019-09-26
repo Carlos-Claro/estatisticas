@@ -125,7 +125,7 @@ class Estatisticas(object):
             print(date_time_str)
             date_time_obj = datetime.datetime.strptime(str(date_time_str), "%Y-%m-%dT%H:%M:%SZ")
             date_now = datetime.datetime.now()
-            data_mais = date_time_obj - datetime.timedelta(days=1)
+            data_mais = date_time_obj + datetime.timedelta(days=1)
             print(data_mais.strftime('%Y-%m-%d'))
             print(date_now.strftime('%Y-%m-%d'))
             dias = data_mais.date() - date_now.date()
