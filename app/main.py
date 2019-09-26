@@ -118,7 +118,7 @@ class Estatisticas(object):
         print(self.fim-self.inicio)
         
     def empresa(self):
-        get_data = requests.get(self.URL_GET_DATA_MIN)
+        get_data = requests.get(self.URL_GET_DATA_MAX)
         if get_data.status_code == 200:
             data_max = get_data.json()
             date_time_str = data_max['itens'][0]['data']
@@ -127,7 +127,8 @@ class Estatisticas(object):
             data_mais = date_time_obj - datetime.timedelta(days=1)
             dias = data_mais.date() - date_now.date()
             d = str(abs(dias)).split(' ')
-            for x in range(int(d[0]),90,1):
+            print(d)
+            for x in range(int(d[0]),1,-1):
                 print(x)
                 self.roda_empresa_dia(x)
         self.fim = time.time()
