@@ -111,7 +111,7 @@ class Estatisticas(object):
             dias = data_menos.date() - date_now.date()
             d = str(abs(dias)).split(' ')
             di = int(d[0])
-            for x in range(di,di+45,1):
+            for x in range(di,di+5,1):
                 print(x)
                 self.roda_imovel_dia(x)
         self.fim = time.time()
