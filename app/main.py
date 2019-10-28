@@ -100,7 +100,7 @@ class Estatisticas(object):
                 #    post = json.dumps(self.get_data_imovel(k,v,data))
                 #    print(post)
     
-    def imovel(self):
+    def imovel_anterior(self):
         get_data = requests.get(self.URL_GET_IMOVEIS_MIN)
         if get_data.status_code == 200:
             data_min = get_data.json()
@@ -112,6 +112,25 @@ class Estatisticas(object):
             d = str(abs(dias)).split(' ')
             di = int(d[0])
             for x in range(di,di+5,1):
+                print(x)
+                self.roda_imovel_dia(x)
+        self.fim = time.time()
+        print(self.fim-self.inicio)
+        
+    def imovel(self):
+        get_data = requests.get(self.URL_GET_IMOVEIS_MAX)
+        if get_data.status_code == 200:
+            data_min = get_data.json()
+            date_time_str = data_min['itens'][0]['data']
+            date_time_obj = datetime.datetime.strptime(str(date_time_str), "%Y-%m-%dT%H:%M:%SZ")
+            data_menos = date_time_obj + datetime.timedelta(days=1)
+            date_now = datetime.datetime.now()
+            print(data_menos.strftime('%Y-%m-%d'))
+            print(date_now.strftime('%Y-%m-%d'))
+            dias = data_menos.date() - date_now.date()
+            d = str(abs(dias)).split(' ')
+            di = int(d[0])
+            for x in range(di,1,-1):
                 print(x)
                 self.roda_imovel_dia(x)
         self.fim = time.time()
