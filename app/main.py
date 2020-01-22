@@ -5,9 +5,10 @@ import time
 import os
 import sys
 import json
+from requests.auth import HTTPBasicAuth
 
 class Estatisticas(object):
-    
+
     def __init__(self):
         if 'localhost' in sys.argv:
             self.localhost = True
@@ -30,12 +31,14 @@ class Estatisticas(object):
         self.URL_GET_IMOVEIS_MAX = self.URI + 'log_imovel_max_data/'
         self.URL_GET_IMOVEIS_B = self.URI + 'log_imoveis_b/'
         self.URL_POST_LOG_IMOVEL = self.URI + 'log_imovel/'
+        self.ARQUIVO_LOG = '/var/log/sistema/estatisticas.log'
+        self.FORMATO_LOG_UNITARIO = '{data} - status_code {status_code} - empresa {idEmpresa} - total {total} - dataLog {dataLog} - funcao: {acao} - tempo: {tempo} '
+        self.FORMATO_LOG_TOTAL = '{data} - status_code: {status_code} - funcao: {acao} - tempo: {tempo} '
         if 'imovel' in sys.argv:
             self.imovel()
         else:
             self.empresa()
-        
-        
+
     def get_dia(self,dias):
         da = datetime.datetime.now() - datetime.timedelta(days=int(dias))
         retorno = []
@@ -47,7 +50,8 @@ class Estatisticas(object):
         d = int(da.strftime('%d'))
         return retorno
         #return datetime.datetime(y,m,d,0,0)
-        
+
+
     def get_data(self, chave, valor, data):
         add = {}
         add['data'] = data
@@ -59,7 +63,7 @@ class Estatisticas(object):
             add[ke]['total'] = va['total']
             add[ke]['imoveis'] = va['imoveis']
         return add
-        
+
     def get_data_imovel(self, chave, valor, data):
         add = {}
         add['data'] = data
@@ -67,8 +71,8 @@ class Estatisticas(object):
         add['total_acessos'] = valor['total_imovel']
         del(valor['total_imovel'])
         return add
-        
-    
+
+
     def roda_empresa_dia(self, dias):
         data = self.get_dia(dias)
         g = {'dias':dias}
@@ -76,12 +80,27 @@ class Estatisticas(object):
         if itens.status_code == 200:
             i = itens.json()
             for k,v in i.items():
+                inicio = time.time()
+                data_log_empresa = {
+                    'data': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'acao': 'adiciona_empresa',
+                    'total': v['total_empresa'],
+                    'idEmpresa': k,
+                    'dataLog': data
+                }
                 post = json.dumps(self.get_data(k,v,data))
                 print(post)
                 res = requests.post(self.URL_POST_LOG_EMPRESA,json=post, auth=self.auth)
+                fim = time.time()
+                data_log_empresa['tempo'] = fim - inicio
+                data_log_empresa['status_code'] = res.status_code
+                linha = self.FORMATO_LOG_UNITARIO.format(**data_log_empresa)
+                with open(self.ARQUIVO_LOG, 'a') as arq:
+                    arq.write(linha)
+                    arq.write('\r\n')
                 del post
                 del res
-        
+
     def roda_imovel_dia(self, dias):
         data = self.get_dia(dias)
         g = {'dias':dias}
@@ -104,7 +123,7 @@ class Estatisticas(object):
                 #for k,v in i.items():
                 #    post = json.dumps(self.get_data_imovel(k,v,data))
                 #    print(post)
-    
+
     def imovel_anterior(self):
         get_data = requests.get(self.URL_GET_IMOVEIS_MIN, auth=self.auth)
         if get_data.status_code == 200:
@@ -121,7 +140,7 @@ class Estatisticas(object):
                 self.roda_imovel_dia(x)
         self.fim = time.time()
         print(self.fim-self.inicio)
-        
+
     def imovel(self):
         get_data = requests.get(self.URL_GET_IMOVEIS_MAX, auth=self.auth)
         if get_data.status_code == 200:
@@ -140,9 +159,14 @@ class Estatisticas(object):
                 self.roda_imovel_dia(x)
         self.fim = time.time()
         print(self.fim-self.inicio)
-        
+
     def empresa(self):
         get_data = requests.get(self.URL_GET_DATA_MAX, auth=self.auth)
+        data_log = {
+            'data': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'acao': 'log_empresa_dia',
+            'status_code': get_data.status_code
+        }
         if get_data.status_code == 200:
             data_max = get_data.json()
             date_time_str = data_max['itens'][0]['data']
@@ -159,7 +183,11 @@ class Estatisticas(object):
                 print(x)
                 self.roda_empresa_dia(x)
         self.fim = time.time()
-        print(self.fim-self.inicio)
+        data_log['tempo'] = self.fim-self.inicio
+        linha = self.FORMATO_LOG_TOTAL.format(**data_log)
+        with open(self.ARQUIVO_LOG, 'a') as arq:
+            arq.write(linha)
+            arq.write('\r\n')
     
 if __name__ == '__main__':
     Estatisticas()
