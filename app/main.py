@@ -15,6 +15,11 @@ class Estatisticas(object):
         else:
             self.localhost = False
             self.URI = 'http://imoveis.powempresas.com/'
+        with open('../../../json/keys.json') as json_file:
+            data = json.load(json_file)
+        self.user = data['basic']['user']
+        self.passwd = data['basic']['passwd']
+        self.auth = HTTPBasicAuth(self.user,self.passwd)
         self.inicio = time.time()
         self.URL_GET = self.URI + 'log_empresas/'
         self.URL_GET_DATA_MIN = self.URI + 'log_empresa_min_data/'
@@ -67,33 +72,33 @@ class Estatisticas(object):
     def roda_empresa_dia(self, dias):
         data = self.get_dia(dias)
         g = {'dias':dias}
-        itens = requests.get(self.URL_GET,params=g)
+        itens = requests.get(self.URL_GET,params=g, auth=self.auth)
         if itens.status_code == 200:
             i = itens.json()
             for k,v in i.items():
                 post = json.dumps(self.get_data(k,v,data))
                 print(post)
-                res = requests.post(self.URL_POST_LOG_EMPRESA,json=post)
+                res = requests.post(self.URL_POST_LOG_EMPRESA,json=post, auth=self.auth)
                 del post
                 del res
         
     def roda_imovel_dia(self, dias):
         data = self.get_dia(dias)
         g = {'dias':dias}
-        itens = requests.get(self.URL_GET_IMOVEIS,params=g)
+        itens = requests.get(self.URL_GET_IMOVEIS,params=g, auth=self.auth)
         if itens.status_code == 200:
             imoveis = itens.json()
             for chave,valor in imoveis.items():
                 print(valor)
                 ga = {'dias':dias,'id_imovel':chave}
-                i = requests.get(self.URL_GET_IMOVEIS_B,params=ga)
+                i = requests.get(self.URL_GET_IMOVEIS_B,params=ga, auth=self.auth)
                 tipos = i.json()
                 imovel = tipos
                 imovel['id_imovel'] = int(chave)
                 imovel['data'] = self.get_dia(dias)
                 imovel['total_acessos'] = valor
                 print(imovel)
-                res = requests.post(self.URL_POST_LOG_IMOVEL,json=json.dumps(imovel))
+                res = requests.post(self.URL_POST_LOG_IMOVEL,json=json.dumps(imovel), auth=self.auth)
                 del imovel
                 #exit()
                 #for k,v in i.items():
@@ -101,7 +106,7 @@ class Estatisticas(object):
                 #    print(post)
     
     def imovel_anterior(self):
-        get_data = requests.get(self.URL_GET_IMOVEIS_MIN)
+        get_data = requests.get(self.URL_GET_IMOVEIS_MIN, auth=self.auth)
         if get_data.status_code == 200:
             data_min = get_data.json()
             date_time_str = data_min['itens'][0]['data']
@@ -118,7 +123,7 @@ class Estatisticas(object):
         print(self.fim-self.inicio)
         
     def imovel(self):
-        get_data = requests.get(self.URL_GET_IMOVEIS_MAX)
+        get_data = requests.get(self.URL_GET_IMOVEIS_MAX, auth=self.auth)
         if get_data.status_code == 200:
             data_min = get_data.json()
             date_time_str = data_min['itens'][0]['data']
@@ -137,7 +142,7 @@ class Estatisticas(object):
         print(self.fim-self.inicio)
         
     def empresa(self):
-        get_data = requests.get(self.URL_GET_DATA_MAX)
+        get_data = requests.get(self.URL_GET_DATA_MAX, auth=self.auth)
         if get_data.status_code == 200:
             data_max = get_data.json()
             date_time_str = data_max['itens'][0]['data']
